@@ -7,8 +7,11 @@ import argparse
 from datetime import datetime
 import random
 import logging
+from typing import Dict
 
 def main() -> None:
+    """ Parses command line arguments, gets simulation parameters, then
+    constructs and builds Simulation"""
     now = datetime.now()
 
     parser = argparse.ArgumentParser(description="Runs simulation.")
@@ -31,6 +34,22 @@ def main() -> None:
     if args.log:
         logfile = "./log/" + args.logname + ".log"
         logging.basicConfig(filename=logfile, level=logging.INFO)
+    params = get_params()
+    print(params)
+
+def get_params() -> Dict:
+    """ Returns a dictionary of simulation parameters """
+    in_n = input("Input space-separated list of N to try: ")
+    in_b1 = input("Input space-separated list of true B1 to try: ")
+
+    try:
+        lst_n = [int(x) for x in in_n.split(" ")]
+        lst_b1 = [float(x) for x in in_b1.split(" ")]
+    except (TypeError, ValueError):
+        print("The arguments failed to parse. Try again.")
+        return get_params()
+
+    return{'n': lst_n, 'b1': lst_b1}
 
 if __name__ == "__main__":
     main()
