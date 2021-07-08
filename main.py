@@ -48,25 +48,25 @@ def get_params() -> Dict:
     """ Returns a dictionary of simulation parameters """
     in_n = input("Input space-separated list of N: ")
     in_b1 = input("Input space-separated list of true B1: ")
-    in_cm = input("Input space-separated list of means of the contaminant "
+    in_om = input("Input space-separated list of means of the outlier "
             "distribution: ")
-    in_cv = input("Input space-separated list of vars. of the contaminant "
+    in_ov = input("Input space-separated list of vars. of the outlier "
         "distribution: ")
-    in_cp = input("Input space-separated list of prop. of contaminants to "
+    in_op = input("Input space-separated list of prop. of outliers to "
             "add: ")
 
     try:
         lst_n = [int(x) for x in in_n.split(" ")]
         lst_b1 = [float(x) for x in in_b1.split(" ")]
-        lst_cm = [float(x) for x in in_cm.split(" ")]
-        lst_cv = [float(x) for x in in_cv.split(" ")]
-        lst_cp = [float(x) for x in in_cp.split(" ") if 0 <= float(x) <= 1]
+        lst_om = [float(x) for x in in_om.split(" ")]
+        lst_ov = [float(x) for x in in_ov.split(" ")]
+        lst_op = [float(x) for x in in_op.split(" ") if 0 <= float(x) <= 1]
     except (TypeError, ValueError):
         print("The arguments failed to parse. Try again.")
         return get_params()
 
-    return{"n": lst_n, "b1": lst_b1, "cm" : lst_cm,
-            "cv" : lst_cv, "cp" : lst_cp}
+    return{"n": lst_n, "b1": lst_b1, "om" : lst_om,
+            "ov" : lst_ov, "op" : lst_op}
 
 if __name__ == "__main__":
     main()
