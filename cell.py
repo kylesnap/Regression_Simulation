@@ -8,6 +8,7 @@ from scipy.stats import norm, uniform
 import numpy as np
 
 REPS = 10
+B0 = 1
 
 class Cell:
     def __init__(self, params: Tuple):
@@ -24,15 +25,20 @@ class Cell:
     def run(self) -> None:
         """ Makes design matrix, then does REPS number of reps of making
         random errors, making true data, then fitting and printing model. """
-        d_mat = self.mk_dmat()
-        errs = self.mk_errors()
-        print(errs)
+        trial = str(self)
+        d_mat = self.mk_dmat() # Deterministic component
+        for i in range(REPS):
+            errs = self.mk_errors() # Stochastic component
+            y = self.mk_y(d_mat, errs)
+            # FIT MODEL HERE
+            print("%d,%s" % (i, trial))
+
 
     def mk_dmat(self) -> NDArray[(Any, 2), np.float64]:
         """ Generates a matrix with all ones in first col, and a uniformly
         distributed X1 variable. """
         x1_gen = uniform(loc = 0, scale = 1)
-        return np.array([[0, x1_gen.rvs()] for i in range(self._n)])
+        return np.array([[1, x1_gen.rvs()] for i in range(self._n)])
 
     def mk_errors(self) -> NDArray[(1), np.float64]:
         """ Generates an array with error terms, with N*OP outliers.
@@ -41,3 +47,8 @@ class Cell:
         return np.array([self._odist.rvs() if
             np.random.random() <= self._op else rdist.rvs() for
             i in range(self._n)])
+
+    def mk_y(self, d_mat: NDArray, errs: NDArray) -> NDArray[(1), np.float64]:
+        """ Generates a vector with observed response terms, generated from
+        a true data generating mechanism """
+        return np.matmul(d_mat, np.array([B0, self._b1])) + errs
