@@ -15,9 +15,7 @@ def main() -> None:
     constructs and builds Simulation"""
 
     start_log()
-    params = get_params()
-    print(params)
-
+    params = {"Test": 1} # get_params()
     sim = simulation.Simulation(params)
     sim.run()
 
@@ -53,7 +51,7 @@ def get_params() -> Dict:
     in_cm = input("Input space-separated list of means of the contaminant "
             "distribution: ")
     in_cv = input("Input space-separated list of vars. of the contaminant "
-            "distribution: ")
+        "distribution: ")
     in_cp = input("Input space-separated list of prop. of contaminants to "
             "add: ")
 
@@ -67,7 +65,7 @@ def get_params() -> Dict:
         print("The arguments failed to parse. Try again.")
         return get_params()
 
-    return{'n': lst_n, 'b1': lst_b1, "cm" : lst_cm,
+    return{"n": lst_n, "b1": lst_b1, "cm" : lst_cm,
             "cv" : lst_cv, "cp" : lst_cp}
 
 if __name__ == "__main__":
