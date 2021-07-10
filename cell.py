@@ -6,9 +6,10 @@ from typing import Tuple, Any
 from nptyping import NDArray
 from scipy.stats import norm, uniform
 import numpy as np
+import ols_lm
 
-REPS = 10
-B0 = 1
+REPS = 1
+B0 = 0
 
 class Cell:
     def __init__(self, params: Tuple):
@@ -27,12 +28,12 @@ class Cell:
         random errors, making true data, then fitting and printing model. """
         trial = str(self)
         d_mat = self.mk_dmat() # Deterministic component
+        print("R,N,B1,OM,OV,OP,BT0,BT1,BTSE0,BTSE1")
         for i in range(REPS):
-            errs = self.mk_errors() # Stochastic component
-            y = self.mk_y(d_mat, errs)
-            # FIT MODEL HERE
-            print("%d,%s" % (i, trial))
-
+            y = self.mk_y(d_mat, self.mk_errors()) # Adds stochastic component
+            mod = ols_lm.OLS_Lm(d_mat, y) # FIT MODEL HERE
+            mod.fit_lm()
+            print("%d,%s,%s" % (i, trial, str(mod)))
 
     def mk_dmat(self) -> NDArray[(Any, 2), np.float64]:
         """ Generates a matrix with all ones in first col, and a uniformly
