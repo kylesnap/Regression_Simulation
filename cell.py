@@ -2,22 +2,23 @@
 # simulation.py
 # Kyle Dewsnap
 # July 8th
-from typing import Tuple, Any
+from typing import Tuple, Any, TextIO
 from nptyping import NDArray
 from scipy.stats import norm, uniform
 import numpy as np
 import ols_lm
 
-REPS = 1
+REPS = 10
 B0 = 0
 
 class Cell:
-    def __init__(self, params: Tuple):
+    def __init__(self, params: Tuple, f: TextIO = None):
         self._params = params
         self._n = params[0]
         self._b1 = params[1]
         self._odist = norm(loc = params[2], scale = params[3])
         self._op = params[4]
+        self._f = f
 
     def __str__(self) -> str:
         """ Prints the n, b1, odist, and op of the oell. """
@@ -28,12 +29,13 @@ class Cell:
         random errors, making true data, then fitting and printing model. """
         trial = str(self)
         d_mat = self.mk_dmat() # Deterministic component
-        print("R,N,B1,OM,OV,OP,BT0,BT1,BTSE0,BTSE1")
         for i in range(REPS):
             y = self.mk_y(d_mat, self.mk_errors()) # Adds stochastic component
             mod = ols_lm.OLS_Lm(d_mat, y) # FIT MODEL HERE
             mod.fit_lm()
-            print("%d,%s,%s" % (i, trial, str(mod)))
+            out = str("%d,%s,%s" % (i + 1, trial, str(mod)))
+            if self._f: self._f.write("%s\n" % out)
+            else: print(out)
 
     def mk_dmat(self) -> NDArray[(Any, 2), np.float64]:
         """ Generates a matrix with all ones in first col, and a uniformly

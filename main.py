@@ -6,20 +6,24 @@
 import argparse
 from datetime import datetime
 import random
-import logging
-from typing import Dict
+import warnings
+import os
+from typing import Dict, TextIO 
 import simulation
 
 def main() -> None:
     """ Parses command line arguments, gets simulation parameters, then
     constructs and builds Simulation"""
 
-    start_log()
-    params = {"Test": 1} # get_params()
-    sim = simulation.Simulation(params)
+    log = start_log()
+    params = get_params()
+    sim = simulation.Simulation(params, log)
     sim.run()
+    if log:
+        log.close()
+        print("Log closed. Simulation end.")
 
-def start_log() -> None:
+def start_log() -> TextIO:
     """ Starts log file. """
     now = datetime.now()
 
@@ -27,8 +31,7 @@ def start_log() -> None:
     parser.add_argument("--noseed", "-n", action="store_true",
                         help="do not seed the next simulation")
     parser.add_argument("--logname", type = str,
-                        default=str("sim_%s_%s" %
-                                    (now.strftime("%x"), now.strftime("%X"))),
+                        default=str("sim_%s" % now.strftime("%d%b%y_%-H%M")),
                         help="name of the log files written by simulation")
     parser.add_argument("--log", "-l", action="store_true",
                         help="prints log file")
@@ -37,12 +40,15 @@ def start_log() -> None:
     if args.noseed:
         random.seed()
     else:
-        logging.warning("This run is seeded.")
-        random.seed(69) # Nice
+        warnings.warn("This run is seeded.")
+        random.seed(66) # Nice
 
+    print(os.path.abspath(os.curdir))
     if args.log:
-        logfile = "./log/" + args.logname + ".log"
-        logging.basicConfig(filename=logfile, level=logging.INFO)
+        logname = "./log/" + args.logname + ".csv"
+        return open(logname, 'w')
+    else:
+        return None
 
 def get_params() -> Dict:
     """ Returns a dictionary of simulation parameters """
