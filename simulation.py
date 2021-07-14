@@ -17,6 +17,10 @@ class Simulation:
         """ Confirms that parameters are acceptable, then creates and runs
         all cells."""
         print(self._params)
+        confirm = input("Run? (Use Cntl + C to Cancel) [Y/y]: ").lower()
+        if confirm != "y":
+            print("Cancelling simulation.")
+            exit(1)
         all_cells = [x for x in itertools.product(*self._p_lst)]
         if self._log:
             with self._log as f:
