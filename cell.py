@@ -7,18 +7,19 @@ from nptyping import NDArray
 from scipy.stats import norm, uniform
 import numpy as np
 import ols_lm
+import sys
 
 REPS = 10
 B0 = 0
 
 class Cell:
-    def __init__(self, params: Tuple, f: TextIO = None):
+    def __init__(self, params: Tuple, handle: TextIO):
         self._params = params
         self._n = params[0]
         self._b1 = params[1]
         self._odist = norm(loc = params[2], scale = params[3])
         self._op = params[4]
-        self._f = f
+        self._handle = handle
 
     def __str__(self) -> str:
         """ Prints the n, b1, odist, and op of the oell. """
@@ -31,22 +32,20 @@ class Cell:
         d_mat = self.mk_dmat() # Deterministic component
         for i in range(REPS):
             y = self.mk_y(d_mat, self.mk_errors()) # Adds stochastic component
-            mod = ols_lm.OLS_Lm(d_mat, y) # FIT MODEL HERE
+            mod = ols_lm.OLS_Lm(d_mat, y)
             mod.fit_lm()
-            out = str("%d,%s,%s" % (i + 1, trial, str(mod)))
-            if self._f: self._f.write("%s\n" % out)
-            else: print(out)
+            self._handle.write("%d,%s,%s\n" % (i + 1, trial, str(mod)))
 
     def mk_dmat(self) -> NDArray[(Any, 2), np.float64]:
         """ Generates a matrix with all ones in first col, and a uniformly
         distributed X1 variable. """
-        x1_gen = uniform(loc = 0, scale = 1)
+        x1_gen = uniform(loc = 0, scale = 1)  # U[0,1]
         return np.array([[1, x1_gen.rvs()] for i in range(self._n)])
 
     def mk_errors(self) -> NDArray[(1), np.float64]:
         """ Generates an array with error terms, with N*OP outliers.
         Error terms are from N(0,1), with outlier terms from odist. """
-        rdist = norm(loc = 0, scale = 1)
+        rdist = norm(loc = 0, scale = 1) #N(0,1)
         return np.array([self._odist.rvs() if
             np.random.random() <= self._op else rdist.rvs() for
             i in range(self._n)])

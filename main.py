@@ -8,7 +8,7 @@ from datetime import datetime
 import random
 import warnings
 import os
-from typing import Dict, TextIO 
+from typing import Dict
 import simulation
 
 def main() -> None:
@@ -19,11 +19,8 @@ def main() -> None:
     params = get_params()
     sim = simulation.Simulation(params, log)
     sim.run()
-    if log:
-        log.close()
-        print("Log closed. Simulation end.")
 
-def start_log() -> TextIO:
+def start_log() -> str:
     """ Starts log file. """
     now = datetime.now()
 
@@ -43,10 +40,8 @@ def start_log() -> TextIO:
         warnings.warn("This run is seeded.")
         random.seed(66) # Nice
 
-    print(os.path.abspath(os.curdir))
     if args.log:
-        logname = "./log/" + args.logname + ".csv"
-        return open(logname, 'w')
+        return "./log/" + args.logname + ".csv"
     else:
         return None
 
