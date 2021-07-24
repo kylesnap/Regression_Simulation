@@ -23,7 +23,7 @@ class Simulation:
             exit(1)
         handle = open(self._log, "w") if self._log else sys.stdout
         all_cells = [x for x in itertools.product(*self._p_lst)]
-        handle.write("R,N,B1,OM,OV,OP,BT0,BT1,BTSE0,BTSE1\n")
+        handle.write("I,N,B1,OM,OV,OP,BT0,BT1,BTSE0,BTSE1,R_SQ\n")
         for i in all_cells:
             exp = cell.Cell(i, handle)
             print("Running cell: %s" % str(exp), file=sys.stdout)
