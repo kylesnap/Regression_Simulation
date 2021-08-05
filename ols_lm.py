@@ -5,7 +5,6 @@
 
 from nptyping import NDArray
 import numpy as np
-import unittest
 
 class OLS_Lm:
     def __init__(self, dmat: NDArray, y: NDArray, fit = True):
@@ -47,24 +46,3 @@ class OLS_Lm:
                     self._resp, res(self._pred, self._resp, self._beta)
                     )**2
                 )[0][1]
-
-class TestOLS(unittest.TestCase):
-
-    def test_nullmod(self):
-        test_pred = np.array([[i, 0] for i in range(100)])
-        test_resp = np.array([[i] for i in range(100)])
-        test_mod = OLS_Lm(test_pred, test_resp)
-        test_mod.fit_lm()
-        self.assertEqual(test_mod._beta[0], 1)
-
-    def test_mod2(self):
-        test_pred = np.array([[1,i] for i in range(100)])
-        test_resp = np.array([[i] for i in range(100)])
-        test_mod = OLS_Lm(test_pred, test_resp)
-        test_mod.fit_lm()
-        self.assertAlmostEqual(test_mod._beta[0], 0)
-        self.assertAlmostEqual(test_mod._beta[1], 1)
-
-if __name__ == "__main__":
-    unittest.main()
-

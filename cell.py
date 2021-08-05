@@ -8,7 +8,7 @@ from scipy.stats import norm, uniform
 import numpy as np
 import ols_lm
 
-REPS = 10
+REPS = 1000
 B0 = 0
 
 class Cell:
