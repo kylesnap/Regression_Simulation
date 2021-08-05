@@ -9,22 +9,16 @@ import sys
 
 class Simulation:
     def __init__(self, parameters: Dict, log: str):
-        self._params = parameters
-        self._p_lst = list(parameters.values())
+        self._all_cells = [x for x in itertools.product(
+            *list(parameters.values()))]
+        # Log can take the value of a string or of NONE if no logging done.
         self._log = log
 
     def run(self) -> None:
-        """ Confirms that parameters are acceptable, then creates and runs
-        all cells. """
-        print(self._params)
-        confirm = input("Run? (Use Cntl + C to Cancel) [Y/y]: ").lower()
-        if confirm != "y":
-            print("Cancelling simulation.")
-            exit(1)
+        """ runs all cells. """
         handle = open(self._log, "w") if self._log else sys.stdout
-        all_cells = [x for x in itertools.product(*self._p_lst)]
-        handle.write("I,N,B1,OM,OV,OP,BT0,BT1,BTSE0,BTSE1,R_SQ\n")
-        for i in all_cells:
+        handle.write("I,N,OM,OP,BT0,BT1,BTSE0,BTSE1,R_SQ\n")
+        for i in self._all_cells:
             exp = cell.Cell(i, handle)
             print("Running cell: %s" % str(exp), file=sys.stdout)
             exp.run()

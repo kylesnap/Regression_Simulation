@@ -1,73 +1,102 @@
-#!/usr/bin/env python3
 # main.py
 # Kyle Dewsnap
-# 28JUN21
+# 24JUL21
 
-import argparse
-from datetime import datetime
+from tkinter import *
+from tkinter import ttk
+from tkinter import messagebox
+import datetime
 import random
-import warnings
-import os
-from typing import Dict
 import simulation
+import warnings
 
-def main() -> None:
-    """ Parses command line arguments, gets simulation parameters, then
-    constructs and builds Simulation"""
+def parse_params():
+    """ Returns a dictionary of simulation parameters """
+    try:
+        lst_n = [int(x) for x in samples.get().split(" ") if int(x) > 1]
+        lst_fm = [float(x) for x in fmeans.get().split(" ")]
+        lst_fp = [float(x) for x in fprops.get().split(" ") if
+                0 <= float(x) < 0.5]
+    except (TypeError, ValueError):
+        messagebox.showerror("Error", "Error parsing lists of parameters.")
+        return
 
-    log = start_log()
-    params = get_params()
-    sim = simulation.Simulation(params, log)
-    sim.run()
+    if not lst_n or not lst_fm or not lst_fp:
+        messagebox.showerror("Error", "Missing values for all parameters.")
+        return
 
-def start_log() -> str:
-    """ Starts log file. """
-    now = datetime.now()
+    params = {"n": lst_n, "fm": lst_fm, "fp": lst_fp, "seed": seed.get(), "log":
+        log.get()}
+    start_sim(params)
 
-    parser = argparse.ArgumentParser(description="Runs simulation.")
-    parser.add_argument("--noseed", "-n", action="store_true",
-                        help="do not seed the next simulation")
-    parser.add_argument("--logname", type = str,
-                        default=str("sim_%s" % now.strftime("%d%b%y_%-H%M")),
-                        help="name of the log files written by simulation")
-    parser.add_argument("--log", "-l", action="store_true",
-                        help="prints log file")
-    args = parser.parse_args()
-
-    if args.noseed:
+def start_sim(params):
+    """ Runs the simulation with dictionary of parameters. """
+    if params.pop("seed") is False:
         random.seed()
     else:
         warnings.warn("This run is seeded.")
         random.seed(66) # Nice
 
-    if args.log:
-        return "./log/" + args.logname + ".csv"
+    if params.pop("log") is True:
+        logname = datetime.now.strftime("./log/sim_%d%b%y_%-H%M.csv")
     else:
-        return None
+        logname = None
 
-def get_params() -> Dict:
-    """ Returns a dictionary of simulation parameters """
-    in_n = input("Input space-separated list of N: ")
-    in_b1 = input("Input space-separated list of true B1: ")
-    in_om = input("Input space-separated list of means of the outlier "
-            "distribution: ")
-    in_ov = input("Input space-separated list of vars. of the outlier "
-        "distribution: ")
-    in_op = input("Input space-separated list of prop. of outliers to "
-            "add: ")
+    print(params)
+    check = None
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        check = messagebox.askokcancel("Confirm?",
+                "Check terminal for correct params")
+    if check:
+        sim = simulation.Simulation(params, logname)
+        sim.run()
+        root.destroy()
+        exit(0)
+    else:
+        return
 
-    try:
-        lst_n = [int(x) for x in in_n.split(" ")]
-        lst_b1 = [float(x) for x in in_b1.split(" ")]
-        lst_om = [float(x) for x in in_om.split(" ")]
-        lst_ov = [float(x) for x in in_ov.split(" ")]
-        lst_op = [float(x) for x in in_op.split(" ") if 0 <= float(x) <= 1]
-    except (TypeError, ValueError):
-        print("The arguments failed to parse. Try again.")
-        return get_params()
+root = Tk()
+root.title("K.D.'s OLS Simulation.")
 
-    return{"n": lst_n, "b1": lst_b1, "om" : lst_om,
-            "ov" : lst_ov, "op" : lst_op}
+mainframe = ttk.Frame(root, padding="3 3 12 12")
+mainframe.grid(column=0, row=0, sticky=(N, W, E, S))
+root.columnconfigure(0, weight=1)
+root.rowconfigure(0, weight=1)
 
-if __name__ == "__main__":
-    main()
+head = ttk.Label(mainframe, text="Space Seperated Lists of Parameters").grid(
+        column=0, row=0)
+
+samples = StringVar()
+ttk.Label(mainframe, text="Sample sizes [2, Inf]", font="TkMenuFont").grid(
+        column=0, row=1, sticky=(W, E))
+samples_entry = ttk.Entry(mainframe, width=10, textvariable=samples)
+samples_entry.grid(column=1, row=1, sticky=(W, E))
+
+fmeans = StringVar()
+ttk.Label(mainframe, text="Focal distribution means", font="TkMenuFont").grid(
+        column=0, row=2, sticky=(W, E))
+fmeans_entry = ttk.Entry(mainframe, width=10, textvariable=fmeans)
+fmeans_entry.grid(column=1, row=2, sticky=(W, E))
+
+fprops = StringVar()
+ttk.Label(mainframe, text="Proportion of deviants [0, 0.5)",
+        font="TkMenuFont").grid(column=0, row=3, sticky=(W, E))
+fprops_entry = ttk.Entry(mainframe, width=10, textvariable=fprops)
+fprops_entry.grid(column=1, row=3, sticky=(W, E))
+
+seed = BooleanVar(value=True)
+ttk.Checkbutton(mainframe, text="Seed random", variable=seed).grid(
+        column=0, row=4, sticky=(W, E))
+log = BooleanVar(value=False)
+ttk.Checkbutton(mainframe, text="Save log file", variable=log).grid(
+        column=1, row=4, sticky=(W, E))
+
+note = ttk.Label(mainframe,
+        text="Terminal will display warnings and progess.").grid(
+        column=0, row=0)
+
+ttk.Button(mainframe, text="Run Simulation!", command=parse_params).grid(
+        column=0, row=5, sticky=(W, E))
+
+root.mainloop()

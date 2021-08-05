@@ -7,7 +7,6 @@ from nptyping import NDArray
 from scipy.stats import norm, uniform
 import numpy as np
 import ols_lm
-import sys
 
 REPS = 10
 B0 = 0
@@ -16,9 +15,9 @@ class Cell:
     def __init__(self, params: Tuple, handle: TextIO):
         self._params = params
         self._n = params[0]
-        self._b1 = params[1]
-        self._odist = norm(loc = params[2], scale = params[3])
-        self._op = params[4]
+        self._b1 = 1
+        self._fdist = norm(loc = params[1], scale = 1) # Focal dist.
+        self._op = params[2]
         self._handle = handle
 
     def __str__(self) -> str:
@@ -38,15 +37,15 @@ class Cell:
 
     def mk_dmat(self) -> NDArray[(Any, 2), np.float64]:
         """ Generates a matrix with all ones in first col, and a uniformly
-        distributed X1 variable. """
+        distributed X1 variable in the second. """
         x1_gen = uniform(loc = 0, scale = 1)  # U[0,1]
         return np.array([[1, x1_gen.rvs()] for i in range(self._n)])
 
     def mk_errors(self) -> NDArray[(1), np.float64]:
-        """ Generates an array with error terms, with N*OP outliers.
+        """ Generates an array with error terms with N*OP outliers.
         Error terms are from N(0,1), with outlier terms from odist. """
-        rdist = norm(loc = 0, scale = 1) #N(0,1)
-        return np.array([self._odist.rvs() if
+        rdist = norm(loc = 0, scale = 1) #N(0,1) (Reference distribution)
+        return np.array([self._fdist.rvs() if
             np.random.random() <= self._op else rdist.rvs() for
             i in range(self._n)])
 
