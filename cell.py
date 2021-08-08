@@ -5,6 +5,7 @@
 from typing import Tuple, Any, TextIO
 from nptyping import NDArray
 from scipy.stats import norm, uniform
+from matplotlib import pyplot as plt
 import numpy as np
 import ols_lm
 
@@ -45,11 +46,22 @@ class Cell:
         """ Generates an array with error terms with N*OP outliers.
         Error terms are from N(0,1), with outlier terms from odist. """
         rdist = norm(loc = 0, scale = 1) #N(0,1) (Reference distribution)
-        return np.array([self._fdist.rvs() if
-            np.random.random() <= self._op else rdist.rvs() for
+        errs = np.array([self._fdist.rvs() if
+            np.random.random() < self._op else rdist.rvs() for
             i in range(self._n)])
+        # For testing the generation of errs
+        #  plt.hist(errs, bins = 100)
+        #  plt.show()
+        #  plt.hist(errs - np.mean(errs), bins = 100)
+        #  plt.show()
+        return errs - np.mean(errs)
 
     def mk_y(self, d_mat: NDArray, errs: NDArray) -> NDArray[(1), np.float64]:
         """ Generates a vector with observed response terms, generated from
         a true data generating mechanism """
         return np.matmul(d_mat, np.array([B0, self._b1])) + errs
+
+if __name__=="__main__":
+    """ Test error generation. """
+    test = Cell((100000, 3, 0.25), None)
+    test.mk_errors()
