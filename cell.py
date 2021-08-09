@@ -9,7 +9,7 @@ from matplotlib import pyplot as plt
 import numpy as np
 import ols_lm
 
-REPS = 1000
+REPS = 5000
 B0 = 0
 
 class Cell:
@@ -31,10 +31,12 @@ class Cell:
         trial = str(self)
         d_mat = self.mk_dmat() # Deterministic component
         for i in range(REPS):
-            y = self.mk_y(d_mat, self.mk_errors()) # Adds stochastic component
+            errs = self.mk_errors()
+            y = self.mk_y(d_mat, errs) # Adds stochastic component
             mod = ols_lm.OLS_Lm(d_mat, y)
             mod.fit_lm()
-            self._handle.write("%d,%s,%s\n" % (i + 1, trial, str(mod)))
+            self._handle.write("%d,%s,%f,%f,%s\n" %
+                    (i + 1, trial, np.mean(errs), np.std(errs), str(mod)))
 
     def mk_dmat(self) -> NDArray[(Any, 2), np.float64]:
         """ Generates a matrix with all ones in first col, and a uniformly
@@ -46,14 +48,12 @@ class Cell:
         """ Generates an array with error terms with N*OP outliers.
         Error terms are from N(0,1), with outlier terms from odist. """
         rdist = norm(loc = 0, scale = 1) #N(0,1) (Reference distribution)
-        errs = np.array([self._fdist.rvs() if
-            np.random.random() < self._op else rdist.rvs() for
-            i in range(self._n)])
-        # For testing the generation of errs
-        #  plt.hist(errs, bins = 100)
-        #  plt.show()
-        #  plt.hist(errs - np.mean(errs), bins = 100)
-        #  plt.show()
+        out_errs = np.array([self._fdist.rvs() for i in
+            range(np.floor(self._n * self._op).astype('int'))])
+        norm_errs = np.array([rdist.rvs() for i in
+            range(self._n - np.floor(self._n * self._op).astype('int'))])
+        errs = np.concatenate((out_errs, norm_errs), axis=None)
+        np.random.shuffle(errs)
         return errs - np.mean(errs)
 
     def mk_y(self, d_mat: NDArray, errs: NDArray) -> NDArray[(1), np.float64]:
@@ -63,5 +63,6 @@ class Cell:
 
 if __name__=="__main__":
     """ Test error generation. """
-    test = Cell((100000, 3, 0.25), None)
-    test.mk_errors()
+    p1 = Cell((100000, 2.68, 0.01), None).mk_errors()
+    p25 = Cell((100000, 2.68, 0.025), None).mk_errors()
+    p5 = Cell((100000, 2.68, 0.05), None).mk_errors()

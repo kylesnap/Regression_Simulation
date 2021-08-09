@@ -17,7 +17,7 @@ class Simulation:
     def run(self) -> None:
         """ runs all cells. """
         handle = open(self._log, "w") if self._log else sys.stdout
-        handle.write("I,N,OM,OP,BT0,BT1,BTSE0,BTSE1,R_SQ\n")
+        handle.write("I,N,OM,OP,EM,ESD,BT0,BT1,BTSE0,BTSE1,R_SQ\n")
         for i in self._all_cells:
             exp = cell.Cell(i, handle)
             print("Running cell: %s" % str(exp), file=sys.stdout)
