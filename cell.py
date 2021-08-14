@@ -5,11 +5,10 @@
 from typing import Tuple, Any, TextIO
 from nptyping import NDArray
 from scipy.stats import norm, uniform
-from matplotlib import pyplot as plt
 import numpy as np
 import ols_lm
 
-REPS = 5000
+REPS =  5000
 B0 = 0
 
 class Cell:

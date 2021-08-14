@@ -5,7 +5,7 @@
 from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox
-import datetime
+from datetime import datetime
 import random
 import simulation
 import warnings
@@ -38,7 +38,7 @@ def start_sim(params):
         random.seed(66) # Nice
 
     if params.pop("log") is True:
-        logname = datetime.now.strftime("./log/sim_%d%b%y_%-H%M.csv")
+        logname = datetime.now().strftime("./log/sim_%d%b%y_%-H%M.csv")
     else:
         logname = None
 
